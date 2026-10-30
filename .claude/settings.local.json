@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.embracehealthcare.com.au)",
+      "PowerShell(python --version)",
+      "Bash(./venv/Scripts/python.exe -m uvicorn api.main:app --port 8000)",
+      "Read(//tmp/**)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__fill",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__click",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(Stop-Process *)"
+    ]
+  }
+}

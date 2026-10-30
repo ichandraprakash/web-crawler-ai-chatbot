@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+lxml
+fastapi
+uvicorn[standard]
+python-dotenv
+groq
+scikit-learn

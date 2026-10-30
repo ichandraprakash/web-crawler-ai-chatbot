@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.git/
+.claude/
+crawler/crawl_output/
+crawler/urls.json
+crawler/site_context.txt
+uvicorn_out.log
+uvicorn_err.log
+*.md

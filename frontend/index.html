@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Embrace Healthcare — Help Assistant (mock)</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1a1a1a; }
+  h1 { font-size: 1.25rem; }
+  #chat { border: 1px solid #ddd; border-radius: 8px; padding: 16px; min-height: 120px; margin-bottom: 12px; }
+  .msg { margin-bottom: 16px; }
+  .msg .role { font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: #888; }
+  .sources { margin-top: 8px; padding-left: 0; list-style: none; }
+  .sources li { font-size: 0.9rem; }
+  .sources a { color: #0a66c2; text-decoration: none; }
+  .sources a:hover { text-decoration: underline; }
+  form { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+  button { padding: 10px 16px; border: none; border-radius: 6px; background: #0a66c2; color: white; cursor: pointer; }
+  button:disabled { background: #999; cursor: not-allowed; }
+  .error { color: #b00020; }
+</style>
+</head>
+<body>
+  <h1>How can we help? Ask me anything about our services…</h1>
+  <div id="chat"></div>
+  <form id="ask-form">
+    <input type="text" id="question" placeholder="e.g. How do I get transport funding?" autocomplete="off" required>
+    <button type="submit" id="submit-btn">Ask</button>
+  </form>
+
+  <script>
+    // Relative path — works whether this page is served by the local API
+    // (uvicorn on :8000) or from the same Cloud Run service in production.
+    const API_URL = "/ask";
+    const chat = document.getElementById("chat");
+    const form = document.getElementById("ask-form");
+    const input = document.getElementById("question");
+    const submitBtn = document.getElementById("submit-btn");
+
+    function addMessage(role, html) {
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.innerHTML = `<div class="role">${role}</div>${html}`;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+
+      addMessage("You", `<p>${question}</p>`);
+      input.value = "";
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question }),
+        });
+        if (!res.ok) throw new Error(`API returned ${res.status}`);
+        const data = await res.json();
+
+        let html = `<p>${data.answer}</p>`;
+        if (data.sources && data.sources.length > 0) {
+          html += "<ul class='sources'>" +
+            data.sources.map(s => `<li><a href="${s.url}" target="_blank">${s.title}</a></li>`).join("") +
+            "</ul>";
+        }
+        addMessage("Assistant", html);
+      } catch (err) {
+        addMessage("Assistant", `<p class="error">Something went wrong: ${err.message}</p>`);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
